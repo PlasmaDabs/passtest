@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="white">
+<title>Norwalk Transit District</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/*
+  All vertical gaps use dvh (with vh fallback) so the layout fills exactly
+  one screen height on any mobile device -- matching Image 2's rhythm.
+
+  Pixel measurements from Image 2 (553x962px reference):
+    Top pad:      1.77vh
+    Title:        2.39vh tall  font-size=5.97vw  wt=700  #2f3336
+    Title→sub:    1.66vh
+    Sub:          1.98vh tall  font-size=3.52vw  wt=400  #3a3b3d
+    Sub→ring:    11.43vh
+    Ring:        20.58vh tall  width=36vw  centred
+    Ring→time:   14.45vh
+    Time:         5.61vh tall  font-size=13.56vw  wt=900  #3a3e3f  centred
+    Time→card:   20.89vh
+    Card: border 1px #d0d0d0, radius 10px, padding 18px 20px
+    Card name:   font-size=4.34vw  wt=700  #2f3032
+    Card loc:    font-size=2.71vw  wt=400  #9b9b9b
+    Card exp:    font-size=3.80vw  wt=700  #5f6065
+    X button:    top-right, #393939, ~20px, wt=400
+*/
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden; /* no scroll -- single screen layout */
+}
+
+.pass {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-width: 600px;
+  margin: 0 auto;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  /* Top pad: 1.77vh. Side pad: 6.33vw (35/553). */
+  padding: 1.77vh 6.33vw 0;
+  position: relative;
+}
+
+/* ─── X CLOSE BUTTON ───
+   Measured: x=521-545, y=17-41 in a 553px frame.
+   Position: top-right corner. Color #393939. Size ~18px. */
+.close-btn {
+  position: absolute;
+  top: 1.77vh;
+  right: 4vw;
+  font-size: clamp(16px, 4vw, 22px);
+  font-weight: 400;
+  color: #393939;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ─── HEADER ───
+   Title: cap-h=23px at 553px → 2.39vh. font-size=5.97vw → ~33px at 553px.
+   Colour: #2f3336. Weight: 700. */
+.hdr-title {
+  font-size: clamp(20px, 5.97vw, 36px);
+  font-weight: 700;
+  color: #2f3336;
+  line-height: 1.15;
+  letter-spacing: -0.2px;
+  /* No top margin -- padding from .pass handles it */
+}
+
+/* Subtitle: 1.66vh below title. font-size=3.52vw. Same dark colour, weight 400. */
+.hdr-sub {
+  font-size: clamp(13px, 3.52vw, 20px);
+  font-weight: 400;
+  color: #3a3b3d;
+  line-height: 1.4;
+  margin-top: 1.66vh;
+}
+
+/* ─── RING ───
+   Sub→ring gap: 11.43vh.
+   Ring diameter: 20.58vh tall, 36vw wide -- use the SMALLER of the two so it's
+   perfectly circular and matches both dimensions simultaneously.
+   Since 20.58vh ≈ 36vw on most portrait phones, use min(20.58vh, 36vw).
+   Centred horizontally. */
+.ring-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 11.43vh;
+  flex-shrink: 0;
+}
+
+.pulsing-ring {
+  width: clamp(140px, min(20.58vh, 36vw), 210px);
+  height: clamp(140px, min(20.58vh, 36vw), 210px);
+  display: block;
+  flex-shrink: 0;
+}
+
+/* ─── TIME DISPLAY ───
+   Ring→time gap: 14.45vh.
+   font-size: 13.56vw → ~75px at 553px. Cap-height=54px=5.61vh.
+   Colour: #3a3e3f. Weight: 900. Centred. */
+.time-display {
+  font-size: clamp(44px, 13.56vw, 82px);
+  font-weight: 900;
+  color: #3a3e3f;
+  letter-spacing: -1.5px;
+  line-height: 1;
+  text-align: center;
+  width: 100%;
+  margin-top: 14.45vh;
+  flex-shrink: 0;
+}
+
+/* ─── CARD ───
+   Time→card gap: 20.89vh.
+   Border: 1px solid #d0d0d0. Radius: 10px. Padding: 18px 20px. */
+.pass-card {
+  width: 100%;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  padding: 18px 20px 20px;
+  background: #ffffff;
+  margin-top: 20.89vh;
+  flex-shrink: 0;
+}
+
+/* Card name: 4.34vw → ~24px at 553px. Weight 700. #2f3032. */
+.card-name {
+  font-size: clamp(15px, 4.34vw, 26px);
+  font-weight: 700;
+  color: #2f3032;
+  line-height: 1.25;
+}
+
+/* Location: 2.71vw → ~15px. Weight 400. #9b9b9b. */
+.card-location {
+  font-size: clamp(12px, 2.71vw, 16px);
+  font-weight: 400;
+  color: #9b9b9b;
+  margin-top: 4px;
+  line-height: 1.3;
+}
+
+.card-divider {
+  height: 1px;
+  background: #e8e8e8;
+  margin: 14px 0;
+}
+
+/* Expires: 3.80vw → ~21px. Weight 700. #5f6065. */
+.card-expires {
+  font-size: clamp(13px, 3.80vw, 22px);
+  font-weight: 700;
+  color: #5f6065;
+  line-height: 1.3;
+}
+</style>
+</head>
+<body>
+<div class="pass">
+
+  <span class="close-btn" role="button" aria-label="Close" onclick="window.close()">&#x2715;</span>
+
+  <div>
+    <div class="hdr-title">Norwalk Transit District</div>
+    <div class="hdr-sub">Show operator your ticket</div>
+  </div>
+
+  <div class="ring-wrap">
+    <img src="norwalk_pulsing_ring.gif" alt="Active pass indicator" class="pulsing-ring">
+  </div>
+
+  <div class="time-display" id="liveTime">4:50:13 PM</div>
+
+  <div class="pass-card">
+    <div class="card-name">Full Fare 7 Day Unlimited</div>
+    <div class="card-location">Norwalk, CT</div>
+    <div class="card-divider"></div>
+    <div class="card-expires" id="expiryText">Expires 4 Apr 2026, 17:49</div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Live clock ── */
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function tick() {
+    var d = new Date();
+    var h = d.getHours();
+    var m = pad(d.getMinutes());
+    var s = pad(d.getSeconds());
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    document.getElementById('liveTime').textContent =
+      h + ':' + m + ':' + s + ' ' + ampm;
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  /* ── Expiry auto-extension logic ── */
+
+  // Base expiry string
+  var EXPIRY_STR = '4 Apr 2026, 17:49';
+  // 16-hour threshold in milliseconds
+  var THRESHOLD_MS = 16 * 60 * 60 * 1000;
+  // Extension: 5 days + 37 minutes in milliseconds
+  var EXTENSION_MS = (5 * 24 * 60 * 60 * 1000) + (37 * 60 * 1000);
+
+  /**
+   * Parse "D MMM YYYY, HH:MM" assuming Eastern Time (UTC-4 during EDT).
+   * We offset to UTC manually so Date treats the string correctly.
+   */
+  function parseExpiryET(str) {
+    // str = "4 Apr 2026, 17:49"
+    var parts = str.match(/^(\d{1,2})\s+(\w{3})\s+(\d{4}),\s+(\d{2}):(\d{2})$/);
+    if (!parts) return null;
+    var months = {
+      Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+      Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11
+    };
+    var day  = parseInt(parts[1], 10);
+    var mon  = months[parts[2]];
+    var year = parseInt(parts[3], 10);
+    var hr   = parseInt(parts[4], 10);
+    var min  = parseInt(parts[5], 10);
+    // Construct as UTC then add 4 hours (ET = UTC-4)
+    return new Date(Date.UTC(year, mon, day, hr + 4, min, 0, 0));
+  }
+
+  /**
+   * Format a Date back to "D MMM YYYY, HH:MM" in Eastern Time (UTC-4).
+   */
+  function formatExpiryET(d) {
+    var months = ['Jan','Feb','Mar','Apr','May','Jun',
+                  'Jul','Aug','Sep','Oct','Nov','Dec'];
+    // Shift to ET (UTC-4)
+    var et = new Date(d.getTime() - 4 * 60 * 60 * 1000);
+    var day  = et.getUTCDate();
+    var mon  = months[et.getUTCMonth()];
+    var year = et.getUTCFullYear();
+    var hr   = pad(et.getUTCHours());
+    var min  = pad(et.getUTCMinutes());
+    return day + ' ' + mon + ' ' + year + ', ' + hr + ':' + min;
+  }
+
+  // Parse and potentially extend
+  var expiry = parseExpiryET(EXPIRY_STR);
+  if (expiry) {
+    var now       = new Date();
+    var remaining = expiry.getTime() - now.getTime();
+
+    if (remaining <= THRESHOLD_MS) {
+      expiry = new Date(expiry.getTime() + EXTENSION_MS);
+      console.log('Expiry auto-extended by 5d 37m. New expiry:', formatExpiryET(expiry));
+    }
+
+    document.getElementById('expiryText').textContent =
+      'Expires ' + formatExpiryET(expiry);
+  }
+
+})();
+</script>
+</body>
+</html>
